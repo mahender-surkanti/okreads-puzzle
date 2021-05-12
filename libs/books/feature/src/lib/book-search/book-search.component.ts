@@ -5,10 +5,14 @@ import {
   clearSearch,
   getAllBooks,
   ReadingListBook,
-  searchBooks
+  searchBooks,
+  removeFromReadingList
 } from '@tmo/books/data-access';
+import {Observable,  of} from 'rxjs';
+import {debounceTime,tap,switchMap,filter, map, startWith, distinctUntilChanged} from 'rxjs/operators';
 import { FormBuilder } from '@angular/forms';
-import { Book } from '@tmo/shared/models';
+import { Book,ReadingListItem } from '@tmo/shared/models';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'tmo-book-search',
@@ -17,14 +21,16 @@ import { Book } from '@tmo/shared/models';
 })
 export class BookSearchComponent implements OnInit {
   books: ReadingListBook[];
-
+  
   searchForm = this.fb.group({
     term: ''
   });
-
+  item : ReadingListItem;
   constructor(
     private readonly store: Store,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private snackBar: MatSnackBar,
+    
   ) {}
 
   get searchTerm(): string {
@@ -35,6 +41,7 @@ export class BookSearchComponent implements OnInit {
     this.store.select(getAllBooks).subscribe(books => {
       this.books = books;
     });
+    this.onChanges();
   }
 
   formatDate(date: void | string) {
@@ -44,9 +51,30 @@ export class BookSearchComponent implements OnInit {
   }
 
   addBookToReadingList(book: Book) {
+    
+    this.item ={
+      bookId:'',
+      title:'',
+      authors:[],
+      description:''
+  
+    };;
+    this.item.bookId=book.id;
     this.store.dispatch(addToReadingList({ book }));
+    this.openSnackBar("Book Added!!","Undo");
+   
   }
-
+  onChanges(){
+    this.searchForm.get('term').valueChanges.pipe(
+        filter( data => data.trim().length > 0 ),
+        debounceTime(500),
+        switchMap((id: string) => {
+       return id ? of(this.store.dispatch(searchBooks({ term: id }))) : of([]);
+     })
+    ).subscribe(data =>{
+      
+    })
+  }
   searchExample() {
     this.searchForm.controls.term.setValue('javascript');
     this.searchBooks();
@@ -58,5 +86,16 @@ export class BookSearchComponent implements OnInit {
     } else {
       this.store.dispatch(clearSearch());
     }
+  }
+
+  openSnackBar(message: string, action: string) {
+    let snackbar=this.snackBar.open(message, action,{
+      duration: 3000
+    });
+    snackbar.onAction().subscribe(() => {
+      console.log('The snack-bar action was triggered!');
+      this.store.dispatch(removeFromReadingList({item:this.item} ));
+    });
+    
   }
 }

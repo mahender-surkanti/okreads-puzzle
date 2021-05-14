@@ -37,6 +37,19 @@ export class ReadingListEffects implements OnInitEffects {
       )
     )
   );
+  updateBook$ = createEffect(() =>
+  this.actions$.pipe(
+    ofType(ReadingListActions.updateToReadingList),
+    concatMap(({ readingItem }) =>
+      this.http.put(`/api/reading-list/${readingItem.bookId}/finished`,readingItem).pipe(
+        map(() => ReadingListActions.confirmedUpdateToReadingList({ readingItem })),
+        catchError(() =>
+          of(ReadingListActions.failedUpdateToReadingList({ readingItem }))
+        )
+      )
+    )
+  )
+);
 
   removeBook$ = createEffect(() =>
     this.actions$.pipe(

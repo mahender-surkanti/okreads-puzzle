@@ -45,6 +45,10 @@ export class BookSearchComponent implements OnInit {
       : undefined;
   }
 
+  addBookToReadingList(book: Book) {
+    this.store.dispatch(addToReadingList({ book }));
+  }
+  
   onChanges(){
     this.searchForm.get('term').valueChanges.pipe(
         filter( data => data.trim().length > 0 ),

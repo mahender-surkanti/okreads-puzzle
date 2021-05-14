@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { addToReadingList,getReadingList, removeFromReadingList } from '@tmo/books/data-access';
+import { addToReadingList,getReadingList, removeFromReadingList,updateToReadingList } from '@tmo/books/data-access';
 import { Book,ReadingListItem } from '@tmo/shared/models';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
@@ -12,8 +12,16 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 export class ReadingListComponent {
   readingList$ = this.store.select(getReadingList);
   book:Book;
+  readingItem:ReadingListItem;
+  readingItems:ReadingListItem[];
   constructor(private readonly store: Store, private snackBar: MatSnackBar) {}
 
+  ngOnInit(): void {
+    this.store.select(getReadingList).subscribe(books => {
+      this.readingItems = books;
+    });
+  
+  }
   removeFromReadingList(item : ReadingListItem) {
     this.store.dispatch(removeFromReadingList({ item }));
     
@@ -42,6 +50,20 @@ export class ReadingListComponent {
     snackbar.onAction().subscribe(() => {
       this.store.dispatch(addToReadingList({book:this.book} ));
     });
-    
+   
+  }
+  finishedBook(item:ReadingListItem)
+  {
+    this.readingItem={
+    bookId:item.bookId,
+    title:item.title, 
+    authors:item.authors,
+    description:item.description,
+    coverUrl:item.coverUrl,
+    publisher:item.publisher,
+    finished:true,
+    finishedDate:new Date().toLocaleDateString()
+    }
+    this.store.dispatch(updateToReadingList({readingItem:this.readingItem}));
   }
 }

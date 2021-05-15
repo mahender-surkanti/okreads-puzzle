@@ -5,6 +5,6 @@
 1. Can include the form validation via ngFormGroup/Form Control with respective fields
 
 ## Manually checked Accessibility issues:
-1. The focus is not going on to the OKreads heading, where any of the screen readers cannot read it.
-1. In search field to be read by VoiceOver aria label must be given
-1. On tab, the focus is going onto buttons of book, But in VoiceOver the book names are not read, which helps user to know about the book they select
+1. For the "img"(image) tag, there is no "alt"(alternative text). when the coverURL fail to fetch the image then alternate text would be helpful to know the image type
+1. On tab, the focus is going onto buttons of book directly and the title of the book is not read by screen reader. Hence added tabindex for the book grid to read the title
+1.  

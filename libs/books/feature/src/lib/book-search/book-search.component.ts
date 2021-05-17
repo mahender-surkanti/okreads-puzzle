@@ -91,13 +91,14 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   }
 
   openSnackBar(message: string, action: string) {
-    let snackbar=this.snackBar.open(message, action,{
+    const snackbar=this.snackBar.open(message, action,{
       duration: 3000
     });
     snackbar.onAction().subscribe(() => {
       console.log('The snack-bar action was triggered!');
       this.store.dispatch(removeFromReadingList({item:this.item} ));
     });
+  }
     
   ngOnDestroy(): void {
     if(this.subscription)

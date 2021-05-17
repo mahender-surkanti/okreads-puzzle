@@ -16,12 +16,6 @@ export class ReadingListComponent {
   readingItems:ReadingListItem[];
   constructor(private readonly store: Store, private snackBar: MatSnackBar) {}
 
-  ngOnInit(): void {
-    this.store.select(getReadingList).subscribe(books => {
-      this.readingItems = books;
-    });
-  
-  }
   removeFromReadingList(item : ReadingListItem) {
     this.store.dispatch(removeFromReadingList({ item }));
     
@@ -43,7 +37,7 @@ export class ReadingListComponent {
     this.openSnackBar('Book Removed','Undo');
   }
   openSnackBar(message: string, action: string) {
-    let snackbar=this.snackBar.open(message, action,{
+    const snackbar=this.snackBar.open(message, action,{
       duration: 3000
     });
     

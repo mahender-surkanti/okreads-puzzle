@@ -35,7 +35,7 @@ export class ReadingListComponent {
     this.openSnackBar('Book Removed','Undo');
   }
   openSnackBar(message: string, action: string) {
-    let snackbar=this.snackBar.open(message, action,{
+    const snackbar=this.snackBar.open(message, action,{
       duration: 3000
     });
     

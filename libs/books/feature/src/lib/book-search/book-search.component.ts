@@ -15,7 +15,6 @@ import { FormBuilder } from '@angular/forms';
 import { Book,ReadingListItem } from '@tmo/shared/models';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { Book } from '@tmo/shared/models';
 import { Subscription } from 'rxjs';
 
 
@@ -99,17 +98,17 @@ export class BookSearchComponent implements OnInit,OnDestroy {
 
 
   openSnackBar(message: string, action: string) {
-    let snackbar=this.snackBar.open(message, action,{
+    const snackbar=this.snackBar.open(message, action,{
       duration: 3000
     });
     snackbar.onAction().subscribe(() => {
       console.log('The snack-bar action was triggered!');
       this.store.dispatch(removeFromReadingList({item:this.item} ));
     });
-    
+  }
 
   ngOnDestroy(): void {
+    if(this.subscription)
     this.subscription.unsubscribe();
-
   }
 }

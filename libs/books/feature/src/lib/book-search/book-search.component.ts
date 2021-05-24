@@ -26,11 +26,9 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   searchForm = this.fb.group({
     term: ''
   });
-  item : ReadingListItem;
   constructor(
     private readonly store: Store,
-    private readonly fb: FormBuilder,
-    private snackBar: MatSnackBar,
+    private readonly fb: FormBuilder
     
   ) {}
   
@@ -53,28 +51,15 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   }
 
   addBookToReadingList(book: Book) {
-    
-    this.item ={
-      bookId:'',
-      title:'',
-      authors:[],
-      description:''
+     this.store.dispatch(addToReadingList({ book }));
+   }
   
-    };;
-    this.item.bookId=book.id;
-    this.store.dispatch(addToReadingList({ book }));
-    this.openSnackBar("Book Added!!","Undo");
-   
-  }
-  onChanges(){
+   onChanges(){
     this.searchForm.get('term').valueChanges.pipe(
         filter( data => data.trim().length > 0 ),
-        debounceTime(500),
-        switchMap((id: string) => {
-       return id ? of(this.store.dispatch(searchBooks({ term: id }))) : of([]);
-     })
-    ).subscribe(data =>{
-      
+        debounceTime(500)
+    ).subscribe(term =>{
+      this.store.dispatch(searchBooks({ term }));
     })
   }
   searchExample() {
@@ -90,16 +75,8 @@ export class BookSearchComponent implements OnInit,OnDestroy {
     }
   }
 
-  openSnackBar(message: string, action: string) {
-    const snackbar=this.snackBar.open(message, action,{
-      duration: 3000
-    });
-    snackbar.onAction().subscribe(() => {
-      console.log('The snack-bar action was triggered!');
-      this.store.dispatch(removeFromReadingList({item:this.item} ));
-    });
-  }
-    
+  
+
   ngOnDestroy(): void {
     if(this.subscription)
     this.subscription.unsubscribe();

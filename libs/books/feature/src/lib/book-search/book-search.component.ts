@@ -5,38 +5,55 @@ import {
   clearSearch,
   getAllBooks,
   ReadingListBook,
-  searchBooks
+  searchBooks,
+  removeFromReadingList,
 } from '@tmo/books/data-access';
+import { Observable, of } from 'rxjs';
+import {
+  debounceTime,
+  tap,
+  switchMap,
+  filter,
+  map,
+  startWith,
+  distinctUntilChanged,
+} from 'rxjs/operators';
 import { FormBuilder } from '@angular/forms';
-import { Book } from '@tmo/shared/models';
+
+import { Book, ReadingListItem } from '@tmo/shared/models';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'tmo-book-search',
   templateUrl: './book-search.component.html',
-  styleUrls: ['./book-search.component.scss']
+  styleUrls: ['./book-search.component.scss'],
 })
-export class BookSearchComponent implements OnInit,OnDestroy {
+export class BookSearchComponent implements OnInit, OnDestroy {
   books: ReadingListBook[];
-  subscription : Subscription;
+
+  subscription: Subscription;
+
   searchForm = this.fb.group({
-    term: ''
+    term: '',
   });
 
   constructor(
     private readonly store: Store,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private snackBar: MatSnackBar
   ) {}
-  
 
   get searchTerm(): string {
     return this.searchForm.value.term;
   }
 
   ngOnInit(): void {
-    this.subscription=this.store.select(getAllBooks).subscribe(books => {
+    this.subscription = this.store.select(getAllBooks).subscribe((books) => {
       this.books = books;
     });
+    this.onChanges();
   }
 
   formatDate(date: void | string) {
@@ -48,7 +65,17 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   addBookToReadingList(book: Book) {
     this.store.dispatch(addToReadingList({ book }));
   }
-
+  onChanges() {
+    this.searchForm
+      .get('term')
+      .valueChanges.pipe(
+        filter((data) => data.trim().length > 0),
+        debounceTime(500)
+      )
+      .subscribe((term) => {
+        this.store.dispatch(searchBooks({ term }));
+      });
+  }
   searchExample() {
     this.searchForm.controls.term.setValue('javascript');
     this.searchBooks();
@@ -63,7 +90,6 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if(this.subscription)
-    this.subscription.unsubscribe();
+    if (this.subscription) this.subscription.unsubscribe();
   }
 }

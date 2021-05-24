@@ -12,13 +12,12 @@ describe('When: I use the reading list feature', () => {
     );
   });
 
-  it('Test the snackbar message', function() {
+  it('Test the snackbar message', () => {
     cy.get('input[type="search"]').type('stocks');
     cy.contains('Want to Read').click();
     cy.on('snackBar', (str) => {
       expect(str).to.include('Book Added!!');
     });
     cy.contains('Undo').click();
-   });
-
+  });
 });

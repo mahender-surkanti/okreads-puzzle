@@ -54,12 +54,9 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   onChanges(){
     this.searchForm.get('term').valueChanges.pipe(
         filter( data => data.trim().length > 0 ),
-        debounceTime(500),
-        switchMap((id: string) => {
-       return id ? of(this.store.dispatch(searchBooks({ term: id }))) : of([]);
-     })
-    ).subscribe(data =>{
-      
+        debounceTime(500)
+    ).subscribe(term =>{
+      this.store.dispatch(searchBooks({ term}));
     })
   }
   searchExample() {

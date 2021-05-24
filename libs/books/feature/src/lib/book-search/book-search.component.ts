@@ -7,6 +7,8 @@ import {
   ReadingListBook,
   searchBooks
 } from '@tmo/books/data-access';
+import {Observable,  of} from 'rxjs';
+import {debounceTime,tap,switchMap,filter, map, startWith, distinctUntilChanged} from 'rxjs/operators';
 import { FormBuilder } from '@angular/forms';
 import { Book } from '@tmo/shared/models';
 import { Subscription } from 'rxjs';
@@ -22,8 +24,7 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   searchForm = this.fb.group({
     term: ''
   });
-
-  constructor(
+   constructor(
     private readonly store: Store,
     private readonly fb: FormBuilder
   ) {}
@@ -37,6 +38,7 @@ export class BookSearchComponent implements OnInit,OnDestroy {
     this.subscription=this.store.select(getAllBooks).subscribe(books => {
       this.books = books;
     });
+    this.onChanges();
   }
 
   formatDate(date: void | string) {
@@ -48,7 +50,15 @@ export class BookSearchComponent implements OnInit,OnDestroy {
   addBookToReadingList(book: Book) {
     this.store.dispatch(addToReadingList({ book }));
   }
-
+  
+  onChanges(){
+    this.searchForm.get('term').valueChanges.pipe(
+        filter( data => data.trim().length > 0 ),
+        debounceTime(500)
+    ).subscribe(term =>{
+      this.store.dispatch(searchBooks({ term}));
+    })
+  }
   searchExample() {
     this.searchForm.controls.term.setValue('javascript');
     this.searchBooks();
